@@ -16,7 +16,6 @@ spark = SparkSession \
     .config("spark.executor.memory", "4g") \
     .config("spark.network.timeout", "800s") \
     .config("spark.executor.heartbeatInterval", "30s") \
-    .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer") \
     .getOrCreate()
 
 # Sample data - ensure data is properly formatted as a list of tuples
