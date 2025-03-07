@@ -10,7 +10,7 @@ os.environ['PYSPARK_DRIVER_PYTHON'] = '/usr/bin/python3.9'
 def main(input_file, output):
     # Create SparkSession
     spark = SparkSession.builder \
-        .appName("Card Count") \
+        .appName("Reno Park Meters") \
         .config("spark.pyspark.python", "/usr/bin/python3.9") \
         .config("spark.pyspark.driver.python", "/usr/bin/python3.9") \
         .master("spark://vmuser-VirtualBox:7077") \
@@ -50,16 +50,16 @@ def main(input_file, output):
 
     parking_tkt.show(10)
     parking_tkt.describe().show()
-    parking_tkt.printSchema()
     # Count nulls for all columns
     null_counts = parking_tkt.select([count(when(col(c).isNull(), c)).alias(c) for c in parking_tkt.columns])
     null_counts.show()
     hdf = parking_tkt.toHandy()
     hdf.show(10)
     fig, ax = plt.subplots(figsize=(10, 7))
-    hdf.cols['AREA'].hist(ax=ax)
+    #hdf.cols['AREA'].hist(ax=ax)
+    #plt.show()
+    hdf.cols['DOLLAR_CASH_2014H1'].hist(ax=ax)
     plt.show()
-    hdf.isnull(ratio=True)
 if __name__ == "__main__":
     import sys
 
