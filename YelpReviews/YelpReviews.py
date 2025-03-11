@@ -40,11 +40,11 @@ def main(input_file, output):
     reviews.createOrReplaceTempView("yelp_businesses")
     # Time Dimension
     spark.sql("""
-    CREATE OR REPLACE TEMPORARY VIEW dim_time AS
-    SELECT 
-      DISTINCT
-      explode(array('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday')) as day_of_week
-    FROM yelp_businesses
+        CREATE OR REPLACE TEMPORARY VIEW dim_time AS
+        SELECT 
+          DISTINCT
+          explode(array('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday')) as day_of_week
+        FROM yelp_businesses
     """)
     #Location Dimension
     spark.sql("""
