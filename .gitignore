@@ -125,3 +125,4 @@ dmypy.json
 
 *.json
 /spark-warehouse
+/spark-warehouse/*
