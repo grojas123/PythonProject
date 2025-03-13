@@ -1,5 +1,4 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.types import StructType, StructField, StringType, DoubleType, IntegerType
 
 import os
 os.environ['PYSPARK_PYTHON'] = '/usr/bin/python3.9'
@@ -7,7 +6,7 @@ os.environ['PYSPARK_DRIVER_PYTHON'] = '/usr/bin/python3.9'
 
 def main():
     spark = SparkSession.builder \
-        .appName("Yelp Reviews") \
+        .appName("Yelp Reviews Analysis") \
         .config("spark.pyspark.python", "/usr/bin/python3.9") \
         .config("spark.pyspark.driver.python", "/usr/bin/python3.9") \
         .master("spark://vmuser-VirtualBox:7077") \
@@ -113,46 +112,7 @@ def main():
     """)
 
     rating_review_correlation.show()
-    # Compare weekday vs weekend operation patterns
-    weekday_weekend_analysis = spark.sql("""
-    WITH weekday_businesses AS (
-        SELECT DISTINCT business_name
-        FROM fact_business_reviews
-        WHERE day_of_week IN ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday')
-    ),
-    weekend_businesses AS (
-        SELECT DISTINCT business_name
-        FROM fact_business_reviews
-        WHERE day_of_week IN ('Saturday', 'Sunday')
-    ),
-    categorized_businesses AS (
-        SELECT 
-            b.name as business_name,
-            b.city,
-            b.stars,
-            b.review_count,
-            CASE
-                WHEN wb.business_name IS NOT NULL AND we.business_name IS NOT NULL THEN 'All Week'
-                WHEN wb.business_name IS NOT NULL THEN 'Weekday Only'
-                WHEN we.business_name IS NOT NULL THEN 'Weekend Only'
-                ELSE 'Unknown'
-            END as operation_pattern
-        FROM yelp_businesses b
-        LEFT JOIN weekday_businesses wb ON b.name = wb.business_name
-        LEFT JOIN weekend_businesses we ON b.name = we.business_name
-    )
-
-    SELECT 
-        operation_pattern,
-        COUNT(*) as num_businesses,
-        AVG(stars) as avg_rating,
-        AVG(review_count) as avg_review_count
-    FROM categorized_businesses
-    GROUP BY operation_pattern
-    ORDER BY num_businesses DESC
-    """)
-
-    weekday_weekend_analysis.show()
+      
     # Find businesses with consistent hours all week vs. variable hours
     hours_consistency = spark.sql("""
     WITH business_hours_patterns AS (

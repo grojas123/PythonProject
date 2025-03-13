@@ -1,6 +1,7 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType, StructField, StringType, DoubleType, IntegerType
-
+from pyspark.sql.functions import dense_rank, lit
+from pyspark.sql.window import Window
 import os
 os.environ['PYSPARK_PYTHON'] = '/usr/bin/python3.9'
 os.environ['PYSPARK_DRIVER_PYTHON'] = '/usr/bin/python3.9'
@@ -37,7 +38,7 @@ def main(input_file, output):
         ]))
     ])
     reviews = spark.read.json(f"hdfs://localhost:9000{input_file}",schema=yelp_schema)
-    
+    reviews.cache()
     reviews.createOrReplaceTempView("yelp_businesses")
     # Time Dimension
     spark.sql("""
@@ -47,22 +48,22 @@ def main(input_file, output):
           explode(array('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday')) as day_of_week
         FROM yelp_businesses
     """)
-    #Location Dimension
-    spark.sql("""
-    CREATE OR REPLACE TEMPORARY VIEW dim_location AS
-    SELECT 
-      DISTINCT city,
-      dense_rank() OVER (ORDER BY city) as location_id
-    FROM yelp_businesses
-    """)
-    #Rating Dimension
-    spark.sql("""
-    CREATE OR REPLACE TEMPORARY VIEW dim_rating AS
-    SELECT 
-      DISTINCT stars as rating_value,
-      dense_rank() OVER (ORDER BY stars) as rating_id
-    FROM yelp_businesses
-    """)
+  # Location dimension with dummy partition
+    location_df = spark.sql("SELECT DISTINCT city FROM yelp_businesses")
+    location_df = location_df.withColumn("dummy_partition", lit(1))
+    window_spec = Window.partitionBy("dummy_partition").orderBy("city")
+    location_dim = location_df.withColumn("location_id", dense_rank().over(window_spec)).drop("dummy_partition")
+    location_dim.createOrReplaceTempView("dim_location")
+
+    # Rating dimension with dummy partition
+    rating_df = spark.sql("SELECT DISTINCT stars as rating_value FROM yelp_businesses")
+    rating_df = rating_df.withColumn("dummy_partition", lit(1))
+    window_spec = Window.partitionBy("dummy_partition").orderBy("rating_value")
+    rating_dim = rating_df.withColumn("rating_id", dense_rank().over(window_spec)).drop("dummy_partition")
+    rating_dim.createOrReplaceTempView("dim_rating")
+    
+    spark.table("dim_location").cache()
+    spark.table("dim_rating").cache()
     #Create the fact table
     spark.sql("""
     CREATE OR REPLACE TEMPORARY VIEW fact_business_reviews AS
@@ -100,13 +101,13 @@ def main(input_file, output):
 
     # Save dimension tables
 # Create your database first
-    spark.sql("CREATE DATABASE IF NOT EXISTS yelp_analytics")
+   # spark.sql("CREATE DATABASE IF NOT EXISTS yelp_analytics")
 
-    # Save dimension tables as Parquet files in HDFS
-    spark.table("dim_time").write.mode("overwrite").parquet("hdfs:///user/vmuser/yelp_analytics/dim_time")
-    spark.table("dim_location").write.mode("overwrite").parquet("hdfs:///user/vmuser/yelp_analytics/dim_location")
-    spark.table("dim_rating").write.mode("overwrite").parquet("hdfs:///user/vmuser/yelp_analytics/dim_rating")
-    spark.table("fact_business_reviews").write.mode("overwrite").parquet("hdfs:///user/vmuser/yelp_analytics/fact_business_reviews")
+    # Save dimension tables and fact table as Parquet files in HDFS
+    spark.table("dim_time").write.mode("overwrite").parquet(f"{output}dim_time")
+    spark.table("dim_location").write.mode("overwrite").parquet(f"{output}dim_location")
+    spark.table("dim_rating").write.mode("overwrite").parquet(f"{output}dim_rating")
+    spark.table("fact_business_reviews").write.mode("overwrite").parquet(f"{output}/fact_business_reviews")
   
 
 if __name__ == "__main__":
