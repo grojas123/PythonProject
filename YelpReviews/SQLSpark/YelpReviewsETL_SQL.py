@@ -97,12 +97,6 @@ def main(input_file, output):
       END IS NOT NULL
     """)
 
-    spark.sql("CREATE DATABASE IF NOT EXISTS yelp_analytics")
-
-    # Save dimension tables
-# Create your database first
-   # spark.sql("CREATE DATABASE IF NOT EXISTS yelp_analytics")
-
     # Save dimension tables and fact table as Parquet files in HDFS
     spark.table("dim_time").write.mode("overwrite").parquet(f"{output}dim_time")
     spark.table("dim_location").write.mode("overwrite").parquet(f"{output}dim_location")
