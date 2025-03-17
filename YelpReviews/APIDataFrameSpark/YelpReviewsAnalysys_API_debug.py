@@ -2,10 +2,8 @@ from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 import os
 from pyspark.sql.window import Window
-
 os.environ['PYSPARK_PYTHON'] = '/usr/bin/python3.9'
 os.environ['PYSPARK_DRIVER_PYTHON'] = '/usr/bin/python3.9'
-
 
 def main():
     spark = SparkSession.builder \
@@ -23,18 +21,19 @@ def main():
         .config("spark.hadoop.fs.defaultFS", "hdfs://localhost:9000") \
         .getOrCreate()
 
-    # Read dimension tables
+ 
+# Read dimension tables
     dim_time_df = spark.read.parquet("hdfs:///user/vmuser/yelp_analytics/dim_time")
     dim_location_df = spark.read.parquet("hdfs:///user/vmuser/yelp_analytics/dim_location")
     dim_rating_df = spark.read.parquet("hdfs:///user/vmuser/yelp_analytics/dim_rating")
     fact_business_reviews_df = spark.read.parquet("hdfs:///user/vmuser/yelp_analytics/fact_business_reviews")
-    # Now you can query using the database name
+# Now you can query using the database name
     dim_time_df.createOrReplaceTempView("dim_time")
     dim_location_df.createOrReplaceTempView("dim_location")
     dim_rating_df.createOrReplaceTempView("dim_rating")
     fact_business_reviews_df.createOrReplaceTempView("fact_business_reviews")
 
-    # Analyze the distribution of business hours by day of week
+# Analyze the distribution of business hours by day of week
 
     # Analyze the distribution of business hours by day of week
     hours_distribution_df = (
@@ -63,7 +62,7 @@ def main():
 
     # Create the late_night_businesses DataFrame
     late_night_businesses_df = (
-        fact_business_reviews_df
+         fact_business_reviews_df
         .filter(F.col("business_hours").isNotNull())
         .withColumn("closing_hour", extract_closing_hour(F.col("business_hours")))
         .join(dim_location_df, fact_business_reviews_df.location_id == dim_location_df.location_id)
@@ -301,7 +300,5 @@ def main():
     )
 
     top_rated_by_city.show(50, False)
-
-
 if __name__ == "__main__":
-    main()
+        main()
