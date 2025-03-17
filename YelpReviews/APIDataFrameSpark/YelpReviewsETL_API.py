@@ -117,7 +117,7 @@ def main(input_file, output):
     spark.table("dim_time").write.mode("overwrite").parquet(f"{output}dim_time")
     spark.table("dim_location").write.mode("overwrite").parquet(f"{output}dim_location")
     spark.table("dim_rating").write.mode("overwrite").parquet(f"{output}dim_rating")
-    spark.table("fact_business_reviews").write.mode("overwrite").parquet(f"{output}/fact_business_reviews")
+    spark.table("fact_business_reviews").write.mode("overwrite").parquet(f"{output}fact_business_reviews")
   
 
 if __name__ == "__main__":
