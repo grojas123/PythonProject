@@ -1,6 +1,5 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType, StructField, StringType, DoubleType, IntegerType
-from pyspark.sql.functions import dense_rank, lit
 from pyspark.sql import functions as F
 from pyspark.sql.window import Window
 import os
@@ -48,8 +47,6 @@ def main(input_file, output):
     days_of_week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
     # Create a DataFrame for yelp_businesses (assuming this already exists)
-    # If you already have a DataFrame called yelp_businesses, use that instead
-    # yelp_businesses_df = spark.table("yelp_businesses")
 
     # Use explode to create the time dimension
     dim_time_df = (
@@ -62,16 +59,16 @@ def main(input_file, output):
     dim_time_df.createOrReplaceTempView("dim_time")
   # Location dimension with dummy partition
     location_df = spark.sql("SELECT DISTINCT city FROM yelp_businesses")
-    location_df = location_df.withColumn("dummy_partition", lit(1))
+    location_df = location_df.withColumn("dummy_partition", F.lit(1))
     window_spec = Window.partitionBy("dummy_partition").orderBy("city")
-    location_dim = location_df.withColumn("location_id", dense_rank().over(window_spec)).drop("dummy_partition")
+    location_dim = location_df.withColumn("location_id", F.dense_rank().over(window_spec)).drop("dummy_partition")
     location_dim.createOrReplaceTempView("dim_location")
 
     # Rating dimension with dummy partition
     rating_df = spark.sql("SELECT DISTINCT stars as rating_value FROM yelp_businesses")
-    rating_df = rating_df.withColumn("dummy_partition", lit(1))
+    rating_df = rating_df.withColumn("dummy_partition", F.lit(1))
     window_spec = Window.partitionBy("dummy_partition").orderBy("rating_value")
-    rating_dim = rating_df.withColumn("rating_id", dense_rank().over(window_spec)).drop("dummy_partition")
+    rating_dim = rating_df.withColumn("rating_id", F.dense_rank().over(window_spec)).drop("dummy_partition")
     rating_dim.createOrReplaceTempView("dim_rating")
     
     spark.table("dim_location").cache()
