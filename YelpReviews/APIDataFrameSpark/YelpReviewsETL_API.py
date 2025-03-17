@@ -1,7 +1,8 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType, StructField, StringType, DoubleType, IntegerType
-from pyspark.sql.functions import dense_rank, lit
+from pyspark.sql.functions import dense_rank, lit,array,explode,col,when
 from pyspark.sql.window import Window
+
 import os
 os.environ['PYSPARK_PYTHON'] = '/usr/bin/python3.9'
 os.environ['PYSPARK_DRIVER_PYTHON'] = '/usr/bin/python3.9'
@@ -41,7 +42,7 @@ def main(input_file, output):
     reviews.cache()
     reviews.createOrReplaceTempView("yelp_businesses")
     # Time Dimension
-    from pyspark.sql import functions as F
+
 
     # Create an array of days of the week
     days_of_week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
@@ -53,7 +54,7 @@ def main(input_file, output):
     # Use explode to create the time dimension
     dim_time_df = (
         spark.read.table("yelp_businesses")
-        .select(F.explode(F.array([F.lit(day) for day in days_of_week])).alias("day_of_week"))
+        .select(explode(array([lit(day) for day in days_of_week])).alias("day_of_week"))
         .distinct()
     )
 
@@ -84,7 +85,7 @@ def main(input_file, output):
     #Create the fact table
     # Define the business hours case statement as a function for reuse
     def business_hours_expr(day_of_week_col):
-        return F.when(day_of_week_col == 'Monday', businesses_df['hours.Monday']) \
+        return when(day_of_week_col == 'Monday', businesses_df['hours.Monday']) \
             .when(day_of_week_col == 'Tuesday', businesses_df['hours.Tuesday']) \
             .when(day_of_week_col == 'Wednesday', businesses_df['hours.Wednesday']) \
             .when(day_of_week_col == 'Thursday', businesses_df['hours.Thursday']) \
@@ -99,14 +100,14 @@ def main(input_file, output):
         .join(dim_rating_df, businesses_df.stars == dim_rating_df.rating_value)
         .crossJoin(dim_time_df)
         .withColumn("business_hours", business_hours_expr(dim_time_df.day_of_week))
-        .filter(F.col("business_hours").isNotNull())
+        .filter(col("business_hours").isNotNull())
         .select(
             businesses_df["name"].alias("business_name"),
             dim_location_df["location_id"],
             dim_rating_df["rating_id"],
             businesses_df["review_count"],
             dim_time_df["day_of_week"],
-            F.col("business_hours")
+            col("business_hours")
         )
     )
 

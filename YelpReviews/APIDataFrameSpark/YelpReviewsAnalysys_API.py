@@ -36,7 +36,6 @@ def main():
 
     # Analyze the distribution of business hours by day of week
 
-    # Analyze the distribution of business hours by day of week
     hours_distribution_df = (
         fact_business_reviews_df
         .filter(F.col("business_hours").isNotNull())
