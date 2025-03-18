@@ -4,20 +4,19 @@ from pyspark.sql import functions as F
 from pyspark.sql.window import Window
 import os
 import re
-from datetime import datetime
-import glob
-import subprocess
-
-os.environ['PYSPARK_PYTHON'] = '/usr/bin/python3.9'
-os.environ['PYSPARK_DRIVER_PYTHON'] = '/usr/bin/python3.9'
+python_path_spark='/usr/bin/python3.9'
+hadoop_host_fs="hdfs://localhost:9000"
+spark_host="spark://vmuser-VirtualBox:7077"
+os.environ['PYSPARK_PYTHON'] = python_path_spark
+os.environ['PYSPARK_DRIVER_PYTHON'] = python_path_spark
 
 
 def main(input_path, output_base):
     spark = SparkSession.builder \
         .appName("Yelp Reviews Incremental ETL") \
-        .config("spark.pyspark.python", "/usr/bin/python3.9") \
-        .config("spark.pyspark.driver.python", "/usr/bin/python3.9") \
-        .master("spark://vmuser-VirtualBox:7077") \
+        .config("spark.pyspark.python", python_path_spark) \
+        .config("spark.pyspark.driver.python", python_path_spark) \
+        .master(spark_host) \
         .config("spark.driver.host", "localhost") \
         .config("spark.driver.bindAddress", "0.0.0.0") \
         .config("spark.driver.memory", "4g") \
@@ -25,7 +24,7 @@ def main(input_path, output_base):
         .config("spark.executor.memory", "4g") \
         .config("spark.network.timeout", "800s") \
         .config("spark.executor.heartbeatInterval", "30s") \
-        .config("spark.hadoop.fs.defaultFS", "hdfs://localhost:9000") \
+        .config("spark.hadoop.fs.defaultFS", hadoop_host_fs) \
         .getOrCreate()
 
     # Define schema
