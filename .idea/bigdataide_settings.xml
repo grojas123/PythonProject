@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="BigDataIdeConnectionSettings">
+    <option name="connections">
+      <list>
+        <ExtendedConnectionData>
+          <option name="extended">
+            <map>
+              <entry key="address" value="rO0ABXQADmxvY2FsaG9zdDo5MDAw" />
+              <entry key="authenticationType" value="rO0ABXQADEV4cGxpY2l0IHVyaQ==" />
+              <entry key="properties" value="rO0ABXQAAQo=" />
+              <entry key="rootPath" value="rO0ABXQAAS8=" />
+              <entry key="tunnel" value="rO0ABXNyAFdjb20uamV0YnJhaW5zLmJpZ2RhdGF0b29scy5jb21tb24uY29ubmVjdGlvbi50dW5uZWwubW9kZWwuQ29ubmVjdGlvblNzaFR1bm5lbERhdGFMZWdhY3mINKLe8MxKawIABVoACWlzRW5hYmxlZEkACnJlbW90ZVBvcnRMAAhjb25maWdJZHQAEkxqYXZhL2xhbmcvU3RyaW5nO0wACWxvY2FsUG9ydHQAE0xqYXZhL2xhbmcvSW50ZWdlcjtMAApyZW1vdGVIb3N0cQB+AAF4cAD/////dAAAcHEAfgAE" />
+              <entry key="useKerberosTicketCache" value="rO0ABXNyABFqYXZhLmxhbmcuQm9vbGVhbs0gcoDVnPruAgABWgAFdmFsdWV4cAE=" />
+            </map>
+          </option>
+          <option name="fqn" value="org.jetbrains.hdfsplugin.hdfs.settings.HdfsJavaConnectionData" />
+          <option name="groupId" value="HdfsJavaConnectionGroup" />
+          <option name="innerId" value="HDFS@HdfsJavaConnectionGroup@3622338886737349527" />
+          <option name="name" value="HDFS_Local" />
+          <option name="perProject" value="true" />
+        </ExtendedConnectionData>
+      </list>
+    </option>
+  </component>
+</project>
